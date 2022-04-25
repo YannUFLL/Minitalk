@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server.c                                           :+:      :+:    :+:   */
+/*   server_bonus.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ydumaine <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/19 20:17:43 by ydumaine          #+#    #+#             */
-/*   Updated: 2022/04/25 21:37:51 by ydumaine         ###   ########.fr       */
+/*   Updated: 2022/04/25 21:38:10 by ydumaine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minitalk.h"
+#include "minitalk_bonus.h"
 /*
 void affichebin(unsigned n)
 {
@@ -53,21 +53,26 @@ char	*ft_strjoin_v2(char *s1, unsigned char c)
 	return (ptr);
 }
 
-char	*ft_printffree(char *ptr)
+char	*ft_printffree(char *ptr, siginfo_t *info)
 {
+	int	client_pid;
+
+	client_pid = info->si_pid;
+	kill(client_pid, SIGUSR2);
 	ft_printf("\n%s", ptr);
 	free(ptr);
 	ptr = NULL;
 	return (ptr);
 }
 
-void	ft_handle_sig(int sig)
+void	ft_handle_sig(int sig, siginfo_t *info, void *context)
 {
 	static unsigned char	c;
 	static int				i;
 	static unsigned char	mask;
 	static char				*ptr;
 
+	(void)context;
 	if (mask == 0)
 		mask = 128;
 	if (sig == SIGUSR2)
@@ -77,7 +82,7 @@ void	ft_handle_sig(int sig)
 	{
 		i = 0;
 		if (c == 0)
-			ptr = ft_printffree(ptr);
+			ptr = ft_printffree(ptr, info);
 		else
 			ptr = ft_strjoin_v2(ptr, c);
 		c = 0;
@@ -91,7 +96,7 @@ int	main(void)
 	int					pid;
 	struct sigaction	sa;
 
-	sa.sa_handler = &ft_handle_sig;
+	sa.sa_sigaction = &ft_handle_sig;
 	sa.sa_flags = SA_SIGINFO;
 	sigaction(SIGUSR1, &sa, NULL);
 	sigaction(SIGUSR2, &sa, NULL);

@@ -1,30 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   client.c                                           :+:      :+:    :+:   */
+/*   client_bonus.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ydumaine <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/20 09:47:26 by ydumaine          #+#    #+#             */
-/*   Updated: 2022/04/25 21:37:35 by ydumaine         ###   ########.fr       */
+/*   Updated: 2022/04/25 21:04:17 by ydumaine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minitalk.h"
-/*
-void affichebin(unsigned n)
+#include "minitalk_bonus.h"
+
+void	ft_handle_sig(int sig)
 {
-    unsigned bit = 0;
-    unsigned mask = 128;
-    printf("\n");
-    for (int i = 7 ; i > -1 ; i--)
-    {
-        bit = (n & mask) >> i;
-        printf("%d", bit);
-        mask >>= 1;
-    }
+	if (sig == SIGUSR2)
+		ft_printf("\nMessage received");
+	exit(0);
 }
-*/
+
 void	ft_send(char c, int pid)
 {
 	char	mask;
@@ -46,21 +40,26 @@ void	ft_send(char c, int pid)
 
 int	main(int argc, char **argv)
 {
-	int		pid;
-	char	*ptr;	
+	int					pid;
+	char				*ptr;
+	struct sigaction	sa;
 
-	if (argc == 3)
+	sa.sa_handler = &ft_handle_sig;
+	sa.sa_flags = SA_SIGINFO;
+	sigaction(SIGUSR2, &sa, NULL);
+	if (argc != 3)
 	{
-		ptr = argv[2];
-		pid = ft_atoi(argv[1]);
-		while (*ptr)
-		{
-			ft_send(*ptr, pid);
-			ptr++;
-		}
-		ft_send(*ptr, pid);
-	}
-	else
 		ft_printf("2 arguments needed : PID then string");
-	return (0);
+		return (0);
+	}
+	ptr = argv[2];
+	pid = ft_atoi(argv[1]);
+	while (*ptr)
+	{
+		ft_send(*ptr, pid);
+		ptr++;
+	}
+	ft_send(*ptr, pid);
+	while (1)
+		;
 }
